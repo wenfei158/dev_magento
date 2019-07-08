@@ -1,0 +1,21 @@
+{
+  "name": "magento2/module-mongo-core",
+  "description": "The module provides an integration of MongoDB into Magento.",
+  "require": {
+    "magento/product-community-edition": "^2.3.2",
+    "mongodb/mongodb": "^1.4"
+  },
+  "version": "1.0.0",
+  "type": "magento2-module",
+  "license": [
+    "proprietary"
+  ],
+  "autoload": {
+    "files": [
+      "./registration.php"
+    ],
+    "psr-4": {
+      "Magento2\\MongoCore\\": "app/code/Magento2/MongoCore"
+    }
+  }
+}
