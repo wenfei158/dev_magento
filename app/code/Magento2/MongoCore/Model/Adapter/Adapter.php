@@ -150,16 +150,6 @@ class Adapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function replaceMany($collectionName, $document, $replacement, array $options = [])
-    {
-        $options['upsert'] = true;
-        $result = $this->_selectCollection($collectionName)->replaceMany($document, $replacement, $options);
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function deleteOne($collectionName, $filter, array $options = [])
     {
         $result = $this->_selectCollection($collectionName)->deleteOne($filter, $options);

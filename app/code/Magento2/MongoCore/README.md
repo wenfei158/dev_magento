@@ -1,4 +1,4 @@
-# Magento 2 MongoDB Core Module #
+# Magento 2 Mongo Core Module #
 
 
 # Description
@@ -7,7 +7,7 @@ The module provides an integration of **MongoDB** into **Magento 2**.
 
 It has been developed and tested against **Magento 2 CE 2.3.2**.
 
-This module should be deployed on new project with huge catalog (> 3,000,000 products) since it allows significant reduction of the performance inpact of the EAV model by reducing dramatically the number of attributes stored into the database.
+This module should be deployed on new project with huge catalog (> 3,000,000 products) since it allows significant reduction of the performance impact of the EAV model by reducing dramatically the number of attributes stored into the database.
 
 
 # System requirements
@@ -48,7 +48,7 @@ php -f bin/magento setup:upgrade
 To configure this module, you should run the command as follows:
 
 ```
-
+php -f bin/magento setup:config:set --mongodb-host="127.0.0.1" --mongodb-port="27017" --mongodb-db="magento" --mongodb-user="magento" --mongodb-password="magento" # Setting for MongoDB
 ```
 After running these commands, you can confirm the configuration of the MongoDB server as shown into the app/etc/env.php file :
 
@@ -67,8 +67,8 @@ After running these commands, you can confirm the configuration of the MongoDB s
 ```
 php -f bin/magento module:enable Magento2_MongoCore # Enable this Module
 php -f bin/magento module:disable Magento2_MongoCore # Disable this Module
-php -f bin/magento setup:config:set --mongodb-host="127.0.0.1" --mongodb-port="27017" --mongodb-db="magento" --mongodb-user="magento" --mongodb-password="magento" # Setting for MongoDB
 ```
+
 
 # Release Memo
 

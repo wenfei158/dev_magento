@@ -1,0 +1,22 @@
+{
+  "name": "magento2/module-mongo-import-export",
+  "description": "The module saves some product attributes to mongoDB instead of MySQL",
+  "require": {
+    "magento/product-community-edition": "^2.3.2",
+    "magento2/module-mongo-core": "^1.0.0",
+    "magento2/module-mongo-catalog": "^1.0.0"
+  },
+  "version": "1.0.0",
+  "type": "magento2-module",
+  "license": [
+    "proprietary"
+  ],
+  "autoload": {
+    "files": [
+      "./registration.php"
+    ],
+    "psr-4": {
+      "Magento2\\MongoImportExport\\": "app/code/Magento2/MongoImportExport"
+    }
+  }
+}

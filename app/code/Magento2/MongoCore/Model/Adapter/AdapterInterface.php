@@ -119,16 +119,6 @@ interface AdapterInterface
     public function replaceOne($collectionName, $document, $replacement, array $options = []);
 
     /**
-     * Replace multiple documents.
-     * @param string $collectionName
-     * @param array $document
-     * @param array $replacement
-     * @param array $options
-     * @return \MongoDB\InsertOneResult
-     */
-    public function replaceMany($collectionName, $document, $replacement, array $options = []);
-
-    /**
      * Deletes at most one document that matches the filter criteria.
      * @param string $collectionName
      * @param array $filter
