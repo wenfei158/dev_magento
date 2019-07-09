@@ -6,11 +6,143 @@
 namespace Magento2\MongoCore\Model\Adapter;
 
 /**
- * Magento Database Adapter Interface
+ * MongoDB Database Adapter Interface
  *
  * @api
  */
 interface AdapterInterface
 {
+    /**
+     * Returns information for all collections in this database.
+     * @return array|\MongoDB\Model\CollectionInfoIterator
+     */
+    public function listCollections();
 
+    /**
+     * Returns information for all indexes for this collection.
+     * @param string $collectionName
+     * @return array|\MongoDB\Model\IndexInfoIterator
+     */
+    public function listIndexes($collectionName);
+
+    /**
+     * Create an index for the collection.
+     * @param string $collectionName
+     * @param array $key
+     * @param array $options
+     * @return string
+     */
+    public function createIndex($collectionName, $key, array $options = []): string;
+
+    /**
+     * Drop an index from the collection.
+     * @param string $collectionName
+     * @param string $indexName
+     * @param array $options
+     * @return array|\MongoDB\Model\BSONDocument
+     */
+    public function dropIndex($collectionName, $indexName, array $options = []);
+
+    /**
+     * Finds a single document matching the query.
+     * @param string $collectionName
+     * @param array $filter
+     * @param array $options
+     * @return array|null
+     */
+    public function findOne($collectionName, $filter = [], array $options = []);
+
+    /**
+     * Finds documents matching the query.
+     * @param string $collectionName
+     * @param array $filter
+     * @param array $options
+     * @return \MongoDB\Driver\Cursor
+     */
+    public function find($collectionName, $filter = [], array $options = []);
+
+    /**
+     * Count the number of documents that match the filter criteria.
+     * @param string $collectionName
+     * @param array $filter
+     * @param array $options
+     * @return integer
+     */
+    public function count($collectionName, $filter = [], array $options = []): integer;
+
+    /**
+     * Insert one document.
+     * @param string $collectionName
+     * @param array $document
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function insertOne($collectionName, $document, array $options = []);
+
+    /**
+     * Insert multiple documents.
+     * @param string $collectionName
+     * @param array $document
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function insertMany($collectionName, $document, array $options = []);
+
+    /**
+     * Update at most one document that matches the filter criteria.
+     * @param string $collectionName
+     * @param array $document
+     * @param array $update
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function updateOne($collectionName, $document, $update, array $options = []);
+
+    /**
+     * Update multiple documents.
+     * @param string $collectionName
+     * @param array $document
+     * @param array $update
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function updateMany($collectionName, $document, $update, array $options = []);
+
+    /**
+     * Replace at most one document that matches the filter criteria.
+     * @param string $collectionName
+     * @param array $document
+     * @param array $replacement
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function replaceOne($collectionName, $document, $replacement, array $options = []);
+
+    /**
+     * Replace multiple documents.
+     * @param string $collectionName
+     * @param array $document
+     * @param array $replacement
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function replaceMany($collectionName, $document, $replacement, array $options = []);
+
+    /**
+     * Deletes at most one document that matches the filter criteria.
+     * @param string $collectionName
+     * @param array $filter
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function deleteOne($collectionName, $filter, array $options = []);
+
+    /**
+     * Delete multiple documents.
+     * @param string $collectionName
+     * @param array $filter
+     * @param array $options
+     * @return \MongoDB\InsertOneResult
+     */
+    public function deleteMany($collectionName, $filter, array $options = []);
 }

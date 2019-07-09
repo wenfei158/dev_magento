@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento2\MongoCore\Model\Adapter;
+namespace Magento2\MongoCore\Model;
 
 use Magento2\MongoCore\Model\Client\ClientFactory;
 use Magento2\MongoCore\Model\Client\FactoryOptions;
