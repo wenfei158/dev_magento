@@ -164,4 +164,13 @@ class Adapter implements AdapterInterface
         $result = $this->_selectCollection($collectionName)->deleteMany($filter, $options);
         return $result;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function bulkWrite($collectionName, $operations, array $options = [])
+    {
+        $result = $this->_selectCollection($collectionName)->bulkWrite($operations, $options);
+        return $result;
+    }
 }

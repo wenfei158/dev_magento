@@ -135,4 +135,13 @@ interface AdapterInterface
      * @return \MongoDB\InsertOneResult
      */
     public function deleteMany($collectionName, $filter, array $options = []);
+
+    /**
+     * Executes multiple write operations.
+     * @param string $collectionName
+     * @param array $operations
+     * @param array $options
+     * @return \MongoDB\BulkWriteResult
+     */
+    public function bulkWrite($collectionName, $operations, array $options = []);
 }
