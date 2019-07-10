@@ -219,6 +219,7 @@ class Product extends \Magento\CatalogImportExport\Model\Import\Product
     protected function _saveProductAttributes(array $attributesData)
     {
         $linkField = $this->getProductEntityLinkField();
+        $entityIdField = \Magento\Eav\Model\Entity::DEFAULT_ENTITY_ID_FIELD;
         foreach ($attributesData as $tableName => $skuData) {
             $tableData = [];
             if ($tableName == 'mongo') {
@@ -234,7 +235,7 @@ class Product extends \Magento\CatalogImportExport\Model\Import\Product
                     $operations = [];
                     foreach ($documents as $id => $attributes) {
                         $operations[] = ['updateOne' =>
-                            [['id' => $id], array_merge($attributes, ['id' => $id]), ['upsert' => true]]
+                            [[$entityIdField => $id], array_merge($attributes, [$entityIdField => $id]), ['upsert' => true]]
                         ];
                     }
                     $this->_mongoAdapter->bulkWrite($collectionId, $operations);

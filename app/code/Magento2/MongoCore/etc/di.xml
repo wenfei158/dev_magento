@@ -8,4 +8,5 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Magento2\MongoCore\Model\Client\ClientFactoryInterface" type="Magento2\MongoCore\Model\Client\ClientFactory" />
     <preference for="Magento2\MongoCore\Model\Adapter\AdapterInterface" type="Magento2\MongoCore\Model\Adapter\Adapter" />
+    <preference for="Magento2\MongoCore\Model\Adapter\Query\Builder\QueryInterface" type="Magento2\MongoCore\Model\Adapter\Query\Builder\Query" />
 </config>
