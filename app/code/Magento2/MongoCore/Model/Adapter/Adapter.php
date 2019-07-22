@@ -48,6 +48,15 @@ class Adapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
+    public function createCollection($collectionName, array $options = [])
+    {
+        $collection = $this->db->createCollection($collectionName, $options);
+        return $collection;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function listIndexes($collectionName)
     {
         $indexes = $this->_selectCollection($collectionName)->listIndexes();

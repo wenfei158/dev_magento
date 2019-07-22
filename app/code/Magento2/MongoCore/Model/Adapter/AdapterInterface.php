@@ -19,6 +19,14 @@ interface AdapterInterface
     public function listCollections();
 
     /**
+     * Returns information for all collections in this database.
+     * @param $collectionName
+     * @param array $options
+     * @return array|\MongoDB\Model\CollectionInfoIterator
+     */
+    public function createCollection($collectionName, array $options = []);
+
+    /**
      * Returns information for all indexes for this collection.
      * @param string $collectionName
      * @return array|\MongoDB\Model\IndexInfoIterator

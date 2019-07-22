@@ -1,9 +1,9 @@
-# Magento 2 Mongo Catalog Module #
+# Magento 2 Mongo Store Module #
 
 
 # Description
 
-The module processes some product attributes by **MongoDB** instead of **MySQL**.
+The module saves some product attributes to **MongoDB** instead of **MySQL**.
 
 It has been developed and tested against **Magento 2 CE 2.3.2**, and it must be used with **magento2/module-mongo-core** together.
 
@@ -13,8 +13,8 @@ This module should be deployed on new project with huge catalog (> 3,000,000 pro
 # Command Usage About this Module
 
 ```
-php -f bin/magento module:enable Magento2_MongoCatalog # Enable this Module
-php -f bin/magento module:disable Magento2_MongoCatalog # Disable this Module
+php -f bin/magento module:enable Magento2_MongoStore # Enable this Module
+php -f bin/magento module:disable Magento2_MongoStore # Disable this Module
 ```
 
 
@@ -23,9 +23,9 @@ php -f bin/magento module:disable Magento2_MongoCatalog # Disable this Module
 ---
 
 ## 1.1.0
-*(2019-07-16)* 
+*(2019-07-21)* 
 
-* Initial the attributes which are saved in MongoDB
+* Initial Collections for Stores
 
 ## 1.0.0
 *(2019-07-09)* 
