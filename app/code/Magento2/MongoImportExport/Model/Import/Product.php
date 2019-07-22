@@ -210,11 +210,7 @@ class Product extends \Magento\CatalogImportExport\Model\Import\Product
 
 
     /**
-     * Save product attributes.
-     *
-     * @param array $attributesData
-     * @return $this
-     * @throws \Exception
+     * {@inheritdoc}
      */
     protected function _saveProductAttributes(array $attributesData)
     {
