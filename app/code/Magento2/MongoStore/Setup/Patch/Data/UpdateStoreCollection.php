@@ -11,8 +11,9 @@ use Magento\Framework\Setup\Patch\PatchVersionInterface;
 use Magento\Store\Model\ResourceModel\Group\CollectionFactory;
 use Magento\Store\Model\ResourceModel\Group\Collection as StoreGroupCollection;
 use Magento2\MongoCore\Model\Adapter\Adapter;
+use Magento\Framework\App\ObjectManager;
 
-class CreateCollection implements DataPatchInterface, PatchVersionInterface
+class UpdateStoreCollection implements DataPatchInterface, PatchVersionInterface
 {
     /**
      * @var CollectionFactory
@@ -25,13 +26,21 @@ class CreateCollection implements DataPatchInterface, PatchVersionInterface
     private $mongoAdapter;
 
     /**
+     * @var \Magento\Framework\Setup\ModuleDataSetupInterface
+     */
+    private $moduleDataSetup;
+
+    /**
+     * @param \Magento\Framework\Setup\ModuleDataSetupInterface $moduleDataSetup
      * @param CollectionFactory $storeGroupFactory
      * @param Adapter $adapter
      */
     public function __construct(
+        \Magento\Framework\Setup\ModuleDataSetupInterface $moduleDataSetup,
         Adapter $adapter,
         CollectionFactory $storeGroupFactory = null
     ) {
+        $this->moduleDataSetup = $moduleDataSetup;
         $this->mongoAdapter = $adapter;
         $this->storeGroupFactory = $storeGroupFactory
             ?: ObjectManager::getInstance()->get(CollectionFactory::class);

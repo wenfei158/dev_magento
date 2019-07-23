@@ -52,11 +52,13 @@ class Db
     {
         $host = $this->config->get('mongodb/connection/host');
         $port = $this->config->get('mongodb/connection/port');
+        $dbName = $this->config->get('mongodb/connection/database');
         $user = $this->config->get('mongodb/connection/username');
         $password = $this->config->get('mongodb/connection/password');
 
         $this->factoryOptions->setHost($host);
         $this->factoryOptions->setPort($port);
+        $this->factoryOptions->setDbName($dbName);
         $this->factoryOptions->setUsername($user);
         $this->factoryOptions->setPassword($password);
 

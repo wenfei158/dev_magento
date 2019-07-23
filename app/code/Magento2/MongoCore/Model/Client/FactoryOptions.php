@@ -24,27 +24,27 @@ class FactoryOptions
     /**
      * @var string
      */
-    private $dbName;
+    private $dbName = '';
 
     /**
      * @var string
      */
-    private $username;
+    private $username = '';
 
     /**
      * @var string
      */
-    private $password;
+    private $password = '';
 
     /**
      * @var array|null
      */
-    private $uriOptions;
+    private $uriOptions = [];
 
     /**
      * @var array|null
      */
-    private $driverOptions;
+    private $driverOptions = [];
 
     /**
      * @return string

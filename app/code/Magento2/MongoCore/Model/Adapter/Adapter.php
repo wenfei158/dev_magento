@@ -22,7 +22,7 @@ class Adapter implements AdapterInterface
      */
     public function __construct(Db $db)
     {
-        $this->db = $db;
+        $this->db = $db->getDb();
     }
 
     /**

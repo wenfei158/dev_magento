@@ -22,10 +22,14 @@ class ClientFactory implements ClientFactoryInterface
         $port = $options->getPort();
         $user = $options->getUsername();
         $password = $options->getPassword();
+        $dbName = $options->getDbName();
         if($user && $password) {
             $uri = "mongodb://${user}:${password}@${host}:${port}";
         } else {
             $uri = "mongodb://${host}:${port}";
+        }
+        if($dbName) {
+            $uri = $uri . "/". $dbName;
         }
         $uriOptions = $options->getUriOptions() ? $options->getUriOptions() : [];
         $driverOptions =  $options->getDriverOptions() ? $options->getDriverOptions() : [];
