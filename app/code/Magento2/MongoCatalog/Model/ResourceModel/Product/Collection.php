@@ -176,7 +176,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
             $attribute = $this->_eavConfig->getAttribute($entity->getType(), $attributeCode);
             if ($attribute && !$attribute->isStatic()) {
                 if($attribute->getBackendTable() == 'mongo') {
-                    $mongoAttributes[] = $attributeId;
+                    $mongoAttributes[] = $attributeCode;
                 } else {
                     $tableAttributes[$attribute->getBackendTable()][] = $attributeId;
                     if (!isset($attributeTypes[$attribute->getBackendTable()])) {
@@ -218,23 +218,14 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
         if(!empty($mongoAttributes)) {
             $storeId = $this->getStoreId();
             $entityIds = array_keys($this->_itemsById);
-            $results = $this->_mongoQuery->getByIds($storeId, $entityIds);
+            $results = $this->_mongoQuery->getByIds($storeId, $entityIds, $mongoAttributes);
             foreach ($results as $result) {
                 $entityIdField = $this->getEntity()->getEntityIdField();
                 $entityId = $result[$entityIdField];
                 unset($result[$entityIdField]);
-                foreach ($result as $attributeId => $attributeValue) {
-                    $attributeCode = array_search($attributeId, $this->_selectAttributes);
-                    if (!$attributeCode) {
-                        $attribute = $this->_eavConfig->getAttribute(
-                            $this->getEntity()->getType(),
-                            $attributeId
-                        );
-                        $attributeCode = $attribute->getAttributeCode();
-                    }
-                    foreach ($this->_itemsById[$entityId] as $object) {
-                        $object->setData($attributeCode, $attributeValue);
-                    }
+                foreach ($result as $attributeCode => $attributeValue) {
+                    $object = $this->_itemsById[$entityId];
+                    $object->setData($attributeCode, $attributeValue);
                 }
             }
         }
@@ -661,7 +652,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     public function isMongoAttribute($attributeCode) {
         $MongoAttributesCodeList = $this->_patchData->getMongoAttributesCode();
-        if (array_search($attributeCode, $MongoAttributesCodeList)) {
+        if (in_array($attributeCode, $MongoAttributesCodeList)) {
             return true;
         }
         return false;

@@ -56,14 +56,15 @@ class UpdateStoreCollection implements DataPatchInterface, PatchVersionInterface
 
         $collectionNameList = [];
         $collections = $this->mongoAdapter->listCollections();
-        /** @var StoreGroupCollection $storeGroupCollection */
-        $storeGroupCollection = $this->storeGroupFactory->create();
         foreach ($collections as $collectionInfo) {
             $collectionNameList[] = $collectionInfo['name'];
         }
+
+        /** @var StoreGroupCollection $storeGroupCollection */
+        $storeGroupCollection = $this->storeGroupFactory->create();
         foreach ($storeGroupCollection as $storeGroup) {
             $storeId = $storeGroup->getDefaultStoreId();
-            if(!array_search($storeId, $collectionNameList)) {
+            if(!in_array($storeId, $collectionNameList)) {
                 $this->mongoAdapter->createCollection($storeId);
             }
         }
