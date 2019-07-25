@@ -32,6 +32,7 @@ class UpdateMongoAttributes implements DataPatchInterface, PatchVersionInterface
         'meta_title',
         'meta_description',
         'meta_keyword',
+        'brand',
         'mfr_no',
         'package_quantity',
         'custom_country_of_origin',
