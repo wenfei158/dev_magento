@@ -12,6 +12,8 @@ use Magento\Framework\Setup\Patch\PatchVersionInterface;
 
 class UpdateMongoAttributes implements DataPatchInterface, PatchVersionInterface
 {
+    const BACKEND_TABLE_NAME = "mongo";
+
     /**
      * @var \Magento\Framework\Setup\ModuleDataSetupInterface
      */
@@ -30,8 +32,9 @@ class UpdateMongoAttributes implements DataPatchInterface, PatchVersionInterface
         'meta_title',
         'meta_description',
         'meta_keyword',
-        'manufacturing_number',
-        'sales_uom',
+        'mfr_no',
+        'package_quantity',
+        'custom_country_of_origin',
         'search_keywords',
         'description',
         'short_description',
@@ -65,11 +68,19 @@ class UpdateMongoAttributes implements DataPatchInterface, PatchVersionInterface
         foreach ($this->mongoAttributes as $attributeCode) {
             $attribute = $eavSetup->getAttribute($entityTypeId, $attributeCode);
             if (isset($attribute['attribute_id'])) {
-                $eavSetup->updateAttribute($entityTypeId, $attribute['attribute_id'], 'backend_table', 'mongo');
+                $eavSetup->updateAttribute($entityTypeId, $attribute['attribute_id'], 'backend_table', self::BACKEND_TABLE_NAME);
             }
         }
 
         $this->moduleDataSetup->getConnection()->endSetup();
+    }
+
+    /**
+    * Get Mongo Attribute Code list
+    */
+    public function getMongoAttributesCode()
+    {
+        return $this->mongoAttributes;
     }
 
     /**

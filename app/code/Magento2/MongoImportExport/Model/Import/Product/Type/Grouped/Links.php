@@ -100,7 +100,7 @@ class Links extends \Magento\GroupedImportExport\Model\Import\Product\Type\Group
             $operations = [];
             foreach ($mongoContent as $id => $links) {
                 $operations[] = ['updateOne' =>
-                    [[$entityIdField => $id], $links, ['upsert' => true]]
+                    [[$entityIdField => $id], ['$set' => $links], ['upsert' => true]]
                 ];
             }
             $this->mongoAdapter->bulkWrite($collectionId, $operations);
