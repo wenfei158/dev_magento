@@ -175,7 +175,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
             }
             $attribute = $this->_eavConfig->getAttribute($entity->getType(), $attributeCode);
             if ($attribute && !$attribute->isStatic()) {
-                if($attribute->getBackendTable() == 'mongo') {
+                if($attribute->getBackendTable() == PatchData::BACKEND_TABLE_NAME) {
                     $mongoAttributes[] = $attributeCode;
                 } else {
                     $tableAttributes[$attribute->getBackendTable()][] = $attributeId;
@@ -222,10 +222,12 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
             foreach ($results as $result) {
                 $entityIdField = $this->getEntity()->getEntityIdField();
                 $entityId = $result[$entityIdField];
-                unset($result[$entityIdField]);
-                foreach ($result as $attributeCode => $attributeValue) {
-                    $object = $this->_itemsById[$entityId];
-                    $object->setData($attributeCode, $attributeValue);
+                foreach ($mongoAttributes as $attributeCode) {
+                    if (isset($result[$attributeCode])) {
+                        foreach ($this->_itemsById[$entityId] as $object) {
+                            $object->setData($attributeCode, $result[$attributeCode]);
+                        }
+                    }
                 }
             }
         }

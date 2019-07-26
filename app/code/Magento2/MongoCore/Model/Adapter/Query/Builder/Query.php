@@ -106,7 +106,7 @@ class Query implements QueryInterface
         $options = ["typeMap" => ['root' => 'array', 'document' => 'array'], "projection" => [$entityIdField => 1]];
         if ($attributeFields) {
             foreach ($attributeFields as $attributeField) {
-                $options['projection'][] = [$attributeField => 1];
+                $options['projection'][$attributeField] = 1;
             }
         }
         return $options;

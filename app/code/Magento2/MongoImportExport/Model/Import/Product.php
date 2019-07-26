@@ -240,7 +240,7 @@ class Product extends \Magento\CatalogImportExport\Model\Import\Product
         $entityIdField = \Magento\Eav\Model\Entity::DEFAULT_ENTITY_ID_FIELD;
         foreach ($attributesData as $tableName => $skuData) {
             $tableData = [];
-            if ($tableName == 'mongo') {
+            if ($tableName == \Magento2\MongoCatalog\Setup\Patch\Data\UpdateMongoAttributes::BACKEND_TABLE_NAME) {
                 foreach ($skuData as $sku => $attributes) {
                     $linkId = $this->_oldSku[strtolower($sku)][$linkField];
                     foreach ($attributes as $attributeId => $storeValues) {
