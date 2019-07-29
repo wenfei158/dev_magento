@@ -85,6 +85,20 @@ class UpdateMongoAttributes implements DataPatchInterface, PatchVersionInterface
     }
 
     /**
+     * Determine whether to save in mongodb
+     *
+     * @param string $attributeCode
+     * @return boolean
+     */
+    public function isMongoAttribute($attributeCode) {
+        $MongoAttributesCodeList = $this->getMongoAttributesCode();
+        if (in_array($attributeCode, $MongoAttributesCodeList)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function getDependencies()

@@ -31,6 +31,21 @@ class Query implements QueryInterface
     /**
      * {@inheritdoc}
      */
+    public function getById($storeId, $entityId, array $attributeFields = [])
+    {
+        if (!$entityId) {
+            return [];
+        }
+        $entityIdField = \Magento\Eav\Model\Entity::DEFAULT_ENTITY_ID_FIELD;
+        $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+        $options = $this->setOptions($attributeFields);
+        $result = $this->adapter->findOne((string)$storeId, $filter, $options);
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getByIds($storeId, $entityIds, array $attributeFields = [])
     {
         if (!$entityIds) {

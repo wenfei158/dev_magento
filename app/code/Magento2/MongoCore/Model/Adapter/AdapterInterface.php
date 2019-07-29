@@ -90,41 +90,41 @@ interface AdapterInterface
     /**
      * Insert multiple documents.
      * @param string $collectionName
-     * @param array $document
+     * @param array $documents
      * @param array $options
      * @return \MongoDB\InsertOneResult
      */
-    public function insertMany($collectionName, $document, array $options = []);
+    public function insertMany($collectionName, $documents, array $options = []);
 
     /**
      * Update at most one document that matches the filter criteria.
      * @param string $collectionName
-     * @param array $document
+     * @param array $filter
      * @param array $update
      * @param array $options
      * @return \MongoDB\InsertOneResult
      */
-    public function updateOne($collectionName, $document, $update, array $options = []);
+    public function updateOne($collectionName, $filter, $update, array $options = []);
 
     /**
      * Update multiple documents.
      * @param string $collectionName
-     * @param array $document
+     * @param array $filter
      * @param array $update
      * @param array $options
      * @return \MongoDB\InsertOneResult
      */
-    public function updateMany($collectionName, $document, $update, array $options = []);
+    public function updateMany($collectionName, $filter, $update, array $options = []);
 
     /**
      * Replace at most one document that matches the filter criteria.
      * @param string $collectionName
-     * @param array $document
+     * @param array $filter
      * @param array $replacement
      * @param array $options
      * @return \MongoDB\InsertOneResult
      */
-    public function replaceOne($collectionName, $document, $replacement, array $options = []);
+    public function replaceOne($collectionName, $filter, $replacement, array $options = []);
 
     /**
      * Deletes at most one document that matches the filter criteria.

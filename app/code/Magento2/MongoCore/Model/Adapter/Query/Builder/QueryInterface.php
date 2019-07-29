@@ -13,6 +13,15 @@ interface QueryInterface
 {
     /**
      * @param int $storeId
+     * @param int $entityId
+     * @param array $attributeFields
+     * @return array
+     * @since 100.1.0
+     */
+    public function getById($storeId, $entityId, array $attributeFields = []);
+
+    /**
+     * @param int $storeId
      * @param array $entityIds
      * @param array $attributeFields
      * @return array

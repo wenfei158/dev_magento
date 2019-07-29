@@ -120,39 +120,37 @@ class Adapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function insertMany($collectionName, $document, array $options = [])
+    public function insertMany($collectionName, $documents, array $options = [])
     {
-        $result = $this->_selectCollection($collectionName)->insertMany($document, $options);
+        $result = $this->_selectCollection($collectionName)->insertMany($documents, $options);
         return $result;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function updateOne($collectionName, $document, $update, array $options = [])
+    public function updateOne($collectionName, $filter, $update, array $options = [])
     {
-        $options['upsert'] = true;
-        $result = $this->_selectCollection($collectionName)->updateOne($document, $update, $options);
+        $result = $this->_selectCollection($collectionName)->updateOne($filter, $update, $options);
         return $result;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function updateMany($collectionName, $document, $update, array $options = [])
+    public function updateMany($collectionName, $filter, $update, array $options = [])
     {
-        $options['upsert'] = true;
-        $result = $this->_selectCollection($collectionName)->updateMany($document, $update, $options);
+        $result = $this->_selectCollection($collectionName)->updateMany($filter, $update, $options);
         return $result;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function replaceOne($collectionName, $document, $replacement, array $options = [])
+    public function replaceOne($collectionName, $filter, $replacement, array $options = [])
     {
         $options['upsert'] = true;
-        $result = $this->_selectCollection($collectionName)->replaceOne($document, $replacement, $options);
+        $result = $this->_selectCollection($collectionName)->replaceOne($filter, $replacement, $options);
         return $result;
     }
 

@@ -175,7 +175,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
             }
             $attribute = $this->_eavConfig->getAttribute($entity->getType(), $attributeCode);
             if ($attribute && !$attribute->isStatic()) {
-                if($attribute->getBackendTable() == PatchData::BACKEND_TABLE_NAME) {
+                if ($attribute->getBackendTable() == PatchData::BACKEND_TABLE_NAME) {
                     $mongoAttributes[] = $attributeCode;
                 } else {
                     $tableAttributes[$attribute->getBackendTable()][] = $attributeId;
@@ -215,7 +215,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
                 }
             }
         }
-        if(!empty($mongoAttributes)) {
+        if (!empty($mongoAttributes)) {
             $storeId = $this->getStoreId();
             $entityIds = array_keys($this->_itemsById);
             $results = $this->_mongoQuery->getByIds($storeId, $entityIds, $mongoAttributes);
@@ -243,7 +243,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     public function getMaxAttributeValue($attribute)
     {
-        if($this->isMongoAttribute($attribute)) {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
             throw new \Exception(
                 'Can not use Mongo Attribute(' . $attribute . ') in getMaxAttributeValue Function in product Collection.'
             );
@@ -284,7 +284,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     public function getAttributeValueCountByRange($attribute, $range)
     {
-        if($this->isMongoAttribute($attribute)) {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
             throw new \Exception(
                 'Can not use Mongo Attribute(' . $attribute . ') in getAttributeValueCountByRange Function in product Collection.'
             );
@@ -329,7 +329,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     public function getAttributeValueCount($attribute)
     {
-        if($this->isMongoAttribute($attribute)) {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
             throw new \Exception(
                 'Can not use Mongo Attribute(' . $attribute . ') in getAttributeValueCount Function in product Collection.'
             );
@@ -383,7 +383,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
     public function getAllAttributeValues($attribute)
     {
-        if($this->isMongoAttribute($attribute)) {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
             throw new \Exception(
                 'Can not use Mongo Attribute(' . $attribute . ') in getAllAttributeValues Function in product Collection.'
             );
@@ -499,7 +499,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
             if (is_array($attribute)) {
                 $sqlArr = [];
                 foreach ($attribute as $condition) {
-                    if($this->isMongoAttribute($attribute)) {
+                    if ($this->_patchData->isMongoAttribute($attribute)) {
                         $this->_filterMongoAttributes[$attribute] = $condition;
                         throw new \Exception(
                             'No use Mongo Attribute(' . $attribute . ') in addAttributeToFilter Function in product Collection.'
@@ -508,14 +508,15 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
                         $sqlArr[] = $this->_getAttributeConditionSql($condition['attribute'], $condition, $joinType);
                     }
                 }
-                if($sqlArr) {
+                if ($sqlArr) {
                     $conditionSql = '(' . implode(') OR (', $sqlArr) . ')';
                 }
             } elseif (is_string($attribute)) {
                 if ($condition === null) {
                     $condition = '';
                 }
-                if ($this->isMongoAttribute($attribute)) {
+                //TODO Make this able processed.
+                if ($this->_patchData->isMongoAttribute($attribute)) {
                     $this->_filterMongoAttributes[$attribute] = $condition;
                     throw new \Exception(
                         'No use Mongo Attribute(' . $attribute . ') in addAttributeToFilter Function in product Collection.'
@@ -582,7 +583,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
         }
 
         //TODO Make this able processed.
-        if($this->isMongoAttribute($attribute)) {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
             $this->_sortMongoAttributes[$attribute] = $dir;
             throw new \Exception(
                 'No use Mongo Attribute(' . $attribute . ') in addAttributeToSort Function in product Collection.'
@@ -644,20 +645,6 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Collection
             $this->getSelect()->order($orderExpr);
         }
         return $this;
-    }
-
-    /**
-     * Determine whether to save in mongodb
-     *
-     * @param string $attributeCode
-     * @return boolean
-     */
-    public function isMongoAttribute($attributeCode) {
-        $MongoAttributesCodeList = $this->_patchData->getMongoAttributesCode();
-        if (in_array($attributeCode, $MongoAttributesCodeList)) {
-            return true;
-        }
-        return false;
     }
 
     /**
