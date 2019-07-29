@@ -8,10 +8,8 @@ namespace Magento2\MongoCatalog\Model\ResourceModel;
 
 use Magento\Framework\DataObject;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
-use Magento\Catalog\Model\ResourceModel\Product\Website\Link as ProductWebsiteLink;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Model\Indexer\Category\Product\TableMaintainer;
-use Magento\Catalog\Model\Product as ProductEntity;
 use Magento\Eav\Model\Entity\Attribute\UniqueValidationInterface;
 use Magento2\MongoCore\Model\Adapter\Adapter;
 use Magento2\MongoCore\Model\Adapter\Query\Builder\Query;
@@ -436,7 +434,15 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
          * In this case we clear all not default values
          */
         $entityIdField = $this->getLinkField();
-        if ($table != PatchData::BACKEND_TABLE_NAME) {
+        if ($table == PatchData::BACKEND_TABLE_NAME) {
+            $attributeCode = $attribute->getAttributeCode();
+            $entityId = $object->getData($entityIdField);
+            if ($hasSingleStore && !$object->isObjectNew()) {
+                $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+                $update = ['$unset' => [$attributeCode => ""]];
+                $this->_mongoAdapter->updateOne($storeId, $filter, $update);
+            }
+        } else {
             $conditions = [
                 'attribute_id = ?' => $attribute->getAttributeId(),
                 "{$entityIdField} = ?" => $object->getData($entityIdField),
@@ -626,17 +632,17 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
                 $update = ['$unset' => [$attributeCode => ""]];
                 if ($attribute->isScopeStore()) {
                     $storeId = $object->getStoreId();
-                    $this->_mongoAdapter->updateOne($storeId, $filter, $update, ['upsert' => true]);
+                    $this->_mongoAdapter->updateOne($storeId, $filter, $update);
                 } elseif ($attribute->isScopeWebsite()) {
                     $storeIds = $object->getWebsiteStoreIds();
                     if (!empty($storeIds)) {
                         foreach ($storeIds as $storeId) {
-                            $this->_mongoAdapter->updateOne($storeId, $filter, $update, ['upsert' => true]);
+                            $this->_mongoAdapter->updateOne($storeId, $filter, $update);
                         }
                     }
                 } elseif ($itemData['value_id'] !== null) {
                     $storeId = \Magento\Store\Model\Store::DEFAULT_STORE_ID;
-                    $this->_mongoAdapter->updateOne($storeId, $filter, $update, ['upsert' => true]);
+                    $this->_mongoAdapter->updateOne($storeId, $filter, $update);
                 }
             } else {
                 if ($attribute->isScopeStore()) {
