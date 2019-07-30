@@ -84,12 +84,13 @@ class Links extends \Magento\GroupedImportExport\Model\Import\Product\Type\Group
                 }
             }
             if (!empty($linksData['position'])) {
-                $this->connection->insertOnDuplicate($attributes['position']['table'], $linksData['position']);
                 foreach($linksData['position'] as $itemKey => $itemValue) {
                     if (isset($itemValue['child_id'])) {
                         $mongoContent[$itemValue['child_id']]['groupSequence'] = $itemValue['value'];
+                        unset($linksData['position'][$itemKey]['child_id']);
                     }
                 }
+                $this->connection->insertOnDuplicate($attributes['position']['table'], $linksData['position']);
             }
             if (!empty($linksData['qty'])) {
                 $this->connection->insertOnDuplicate($attributes['qty']['table'], $linksData['qty']);
