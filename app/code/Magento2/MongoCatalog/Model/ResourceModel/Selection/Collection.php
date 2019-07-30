@@ -301,6 +301,7 @@ class Collection extends \Magento2\MongoCatalog\Model\ResourceModel\Product\Coll
      *
      * @return $this
      * @since 100.2.0
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function addPriceFilter($product, $searchMin, $useRegularPrice = false)
     {

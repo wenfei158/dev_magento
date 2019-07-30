@@ -37,7 +37,7 @@ class Query implements QueryInterface
             return [];
         }
         $entityIdField = \Magento\Eav\Model\Entity::DEFAULT_ENTITY_ID_FIELD;
-        $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+        $filter = [$entityIdField => ['$eq' => (integer)$entityId]];
         $options = $this->setOptions($attributeFields);
         $result = $this->adapter->findOne((string)$storeId, $filter, $options);
         return $result;

@@ -165,7 +165,7 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
             $entityIdField = $this->getLinkField();
             $storeId = $row['store_id'] ? : 0;
             $entityId = $object->getData($this->getLinkField());
-            $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+            $filter = [$entityIdField => ['$eq' => (integer)$entityId]];
             if($newValue == null) {
                 $update = ['$unset' => [$attributeCode => ""]];
                 $this->_mongoAdapter->updateOne($storeId, $filter, $update);
@@ -348,7 +348,7 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
                 } else {
                     $attributeCode = $this->getAttribute($data['attribute_id'])->getAttributeCode();
                 }
-                $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+                $filter = [$entityIdField => ['$eq' => (integer)$entityId]];
                 $update = ['$set' => [$attributeCode => $data['value']]];;
                 $this->_mongoAdapter->updateOne($storeId, $filter, $update, ['upsert' => true]);
             } else {
@@ -394,7 +394,7 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
 
         $storeIds = $object->getStoreIds();
         $entityIdField = \Magento\Eav\Model\Entity::DEFAULT_ENTITY_ID_FIELD;
-        $filter = [$entityIdField => ['$eq' => (string)$id]];
+        $filter = [$entityIdField => ['$eq' => (integer)$id]];
         foreach($storeIds as $storeId) {
             $this->_mongoAdapter->deleteOne($storeId, $filter);
         }
@@ -438,7 +438,7 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
             $attributeCode = $attribute->getAttributeCode();
             $entityId = $object->getData($entityIdField);
             if ($hasSingleStore && !$object->isObjectNew()) {
-                $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+                $filter = [$entityIdField => ['$eq' => (integer)$entityId]];
                 $update = ['$unset' => [$attributeCode => ""]];
                 $this->_mongoAdapter->updateOne($storeId, $filter, $update);
             }
@@ -512,7 +512,7 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
         $entityId = $object->getId();
         if($table == PatchData::BACKEND_TABLE_NAME) {
             $attributeCode = $attribute->getAttributeCode();
-            $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+            $filter = [$entityIdField => ['$eq' => (integer)$entityId]];
             $update = ['$set' => [$attributeCode => $value]];
             $this->_mongoAdapter->updateOne($storeId, $filter, $update, ['upsert' => true]);
         } else {
@@ -572,7 +572,7 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
                 if($table == PatchData::BACKEND_TABLE_NAME) {
                     $entityIdField = $this->getLinkField();
                     $entityId = $object->getData($this->getLinkField());
-                    $filter = [$entityIdField => ['$eq' => (string)$entityId]];
+                    $filter = [$entityIdField => ['$eq' => (integer)$entityId]];
                     $attributeCode = $attribute->getAttributeCode();
                     $update = ['$set' => [$attributeCode => $value]];
                     $this->_mongoAdapter->updateOne($storeId, $filter, $update, ['upsert' => true]);
@@ -628,7 +628,7 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
             $attribute = $this->getAttribute($itemData['attribute_id']);
             if($table == PatchData::BACKEND_TABLE_NAME) {
                 $attributeCode = $attribute->getAttributeCode();
-                $filter = [$entityIdField => ['$eq' => (string)$id]];
+                $filter = [$entityIdField => ['$eq' => (integer)$id]];
                 $update = ['$unset' => [$attributeCode => ""]];
                 if ($attribute->isScopeStore()) {
                     $storeId = $object->getStoreId();
