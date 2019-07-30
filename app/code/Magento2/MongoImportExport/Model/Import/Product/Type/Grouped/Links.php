@@ -56,7 +56,7 @@ class Links extends \Magento\GroupedImportExport\Model\Import\Product\Type\Group
                     'linked_product_id' => $productData['child_id'],
                     'link_type_id' => $this->getLinkTypeId()
                 ];
-                $mongoContent[$productData['child_id']]['groupId'] = $productData['parent_id'];
+                $mongoContent[$productData['child_id']]['group_id'] = (integer)$productData['parent_id'];
 
             }
             $this->connection->insertOnDuplicate($mainTable, $mainData);
@@ -86,7 +86,7 @@ class Links extends \Magento\GroupedImportExport\Model\Import\Product\Type\Group
             if (!empty($linksData['position'])) {
                 foreach($linksData['position'] as $itemKey => $itemValue) {
                     if (isset($itemValue['child_id'])) {
-                        $mongoContent[$itemValue['child_id']]['groupSequence'] = $itemValue['value'];
+                        $mongoContent[$itemValue['child_id']]['sequence_in_group'] = $itemValue['value'];
                         unset($linksData['position'][$itemKey]['child_id']);
                     }
                 }
@@ -101,7 +101,7 @@ class Links extends \Magento\GroupedImportExport\Model\Import\Product\Type\Group
             $operations = [];
             foreach ($mongoContent as $id => $links) {
                 $operations[] = ['updateOne' =>
-                    [[$entityIdField => $id], ['$set' => $links], ['upsert' => true]]
+                    [[$entityIdField => ['$eq' => (integer)$id]], ['$set' => $links], ['upsert' => true]]
                 ];
             }
             $this->mongoAdapter->bulkWrite($collectionId, $operations);

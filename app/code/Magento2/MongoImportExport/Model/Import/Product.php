@@ -253,7 +253,7 @@ class Product extends \Magento\CatalogImportExport\Model\Import\Product
                     $operations = [];
                     foreach ($documents as $id => $attributes) {
                         $operations[] = ['updateOne' =>
-                            [[$entityIdField => $id], ['$set' => array_merge($attributes, [$entityIdField => $id])], ['upsert' => true]]
+                            [[$entityIdField => ['$eq' => (integer)$id]], ['$set' => array_merge($attributes, [$entityIdField => $id])], ['upsert' => true]]
                         ];
                     }
                     $this->_mongoAdapter->bulkWrite($collectionId, $operations);

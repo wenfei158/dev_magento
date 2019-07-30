@@ -5,10 +5,10 @@
  */
 namespace Magento2\MongoCatalog\Model\ResourceModel\Selection;
 
-use Magento\Framework\DataObject;
-use Magento\Framework\DB\Select;
 use Magento\Catalog\Model\ResourceModel\Product\Collection\ProductLimitationFactory;
-use Magento\Framework\App\ObjectManager;
+use Magento2\MongoCore\Model\Adapter\Query\Builder\Query;
+use Magento2\MongoCatalog\Setup\Patch\Data\UpdateMongoAttributes as PatchData;
+use Magento\Framework\Model\ResourceModel\ResourceModelPoolInterface;
 
 /**
  * Bundle Selections Resource Collection
@@ -17,36 +17,31 @@ use Magento\Framework\App\ObjectManager;
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @since 100.0.2
  */
-class Collection extends \Magento2\MongoCatalog\Model\ResourceModel\Product\Collection
+class Collection extends \Magento\Bundle\Model\ResourceModel\Selection\Collection
 {
     /**
-     * Selection table name
+     * @var Query
+     */
+    protected $_mongoQuery;
+
+    /**
+     * @var PatchData
+     */
+    protected $_patchData;
+
+    /**
+     * Mongo attributes used for sort.
      *
-     * @var string
+     * @var array
      */
-    protected $_selectionTable;
+    protected $_sortMongoAttributes = [];
 
     /**
-     * @var DataObject
-     */
-    private $itemPrototype = null;
-
-    /**
-     * @var \Magento\CatalogRule\Model\ResourceModel\Product\CollectionProcessor
-     */
-    private $catalogRuleProcessor = null;
-
-    /**
-     * Is website scope prices joined to collection
+     * Mongo attributes used for filter.
      *
-     * @var bool
+     * @var array
      */
-    private $websiteScopePriceJoined = false;
-
-    /**
-     * @var \Magento\CatalogInventory\Model\ResourceModel\Stock\Item
-     */
-    private $stockItem;
+    protected $_filterMongoAttributes = [];
 
     /**
      * Collection constructor.
@@ -69,6 +64,8 @@ class Collection extends \Magento2\MongoCatalog\Model\ResourceModel\Product\Coll
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Framework\Stdlib\DateTime $dateTime
      * @param \Magento\Customer\Api\GroupManagementInterface $groupManagement
+     * @param Query $mongoQuery
+     * @param PatchData $patchData
      * @param \Magento\Framework\DB\Adapter\AdapterInterface|null $connection
      * @param ProductLimitationFactory|null $productLimitationFactory
      * @param \Magento\Framework\EntityManager\MetadataPool|null $metadataPool
@@ -96,6 +93,8 @@ class Collection extends \Magento2\MongoCatalog\Model\ResourceModel\Product\Coll
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\Stdlib\DateTime $dateTime,
         \Magento\Customer\Api\GroupManagementInterface $groupManagement,
+        Query $mongoQuery,
+        PatchData $patchData,
         \Magento\Framework\DB\Adapter\AdapterInterface $connection = null,
         ProductLimitationFactory $productLimitationFactory = null,
         \Magento\Framework\EntityManager\MetadataPool $metadataPool = null,
@@ -125,246 +124,519 @@ class Collection extends \Magento2\MongoCatalog\Model\ResourceModel\Product\Coll
             $connection,
             $productLimitationFactory,
             $metadataPool,
-            $tableMaintainer
-        );
-
-        $this->stockItem = $stockItem
-            ?? ObjectManager::getInstance()->get(\Magento\CatalogInventory\Model\ResourceModel\Stock\Item::class);
-    }
-
-    /**
-     * Initialize collection
-     *
-     * @return void
-     */
-    protected function _construct()
-    {
-        parent::_construct();
-        $this->setRowIdFieldName('selection_id');
-        $this->_selectionTable = $this->getTable('catalog_product_bundle_selection');
-    }
-
-    /**
-     * Set store id for each collection item when collection was loaded
-     *
-     * @return $this
-     */
-    public function _afterLoad()
-    {
-        return parent::_afterLoad();
-    }
-
-    /**
-     * Initialize collection select
-     *
-     * @return $this|void
-     */
-    protected function _initSelect()
-    {
-        parent::_initSelect();
-        $this->getSelect()->join(
-            ['selection' => $this->_selectionTable],
-            'selection.product_id = e.entity_id',
-            ['*']
+            $tableMaintainer,
+            $stockItem
         );
     }
 
     /**
-     * Join website scope prices to collection, override default prices
+     * Load attributes into loaded entities
      *
-     * @param int $websiteId
+     * @param bool $printQuery
+     * @param bool $logQuery
      * @return $this
-     */
-    public function joinPrices($websiteId)
-    {
-        $connection = $this->getConnection();
-        $priceType = $connection->getCheckSql(
-            'price.selection_price_type IS NOT NULL',
-            'price.selection_price_type',
-            'selection.selection_price_type'
-        );
-        $priceValue = $connection->getCheckSql(
-            'price.selection_price_value IS NOT NULL',
-            'price.selection_price_value',
-            'selection.selection_price_value'
-        );
-        $this->getSelect()->joinLeft(
-            ['price' => $this->getTable('catalog_product_bundle_selection_price')],
-            'selection.selection_id = price.selection_id AND price.website_id = ' . (int)$websiteId .
-            ' AND selection.parent_product_id = price.parent_product_id',
-            [
-                'selection_price_type' => $priceType,
-                'selection_price_value' => $priceValue,
-                'parent_product_id' => 'price.parent_product_id',
-                'price_scope' => 'price.website_id'
-            ]
-        );
-        $this->websiteScopePriceJoined = true;
-
-        return $this;
-    }
-
-    /**
-     * Apply option ids filter to collection
-     *
-     * @param array $optionIds
-     * @return $this
-     */
-    public function setOptionIdsFilter($optionIds)
-    {
-        if (!empty($optionIds)) {
-            $this->getSelect()->where('selection.option_id IN (?)', $optionIds);
-        }
-        return $this;
-    }
-
-    /**
-     * Apply selection ids filter to collection
-     *
-     * @param array $selectionIds
-     * @return $this
-     */
-    public function setSelectionIdsFilter($selectionIds)
-    {
-        if (!empty($selectionIds)) {
-            $this->getSelect()->where('selection.selection_id IN (?)', $selectionIds);
-        }
-        return $this;
-    }
-
-    /**
-     * Set position order
-     *
-     * @return $this
-     */
-    public function setPositionOrder()
-    {
-        $this->getSelect()->order('selection.position asc')->order('selection.selection_id asc');
-        return $this;
-    }
-
-    /**
-     * Add filtering of products that have 0 items left.
-     *
-     * @return $this
-     * @since 100.2.0
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function addQuantityFilter()
+    public function _loadAttributes($printQuery = false, $logQuery = false)
     {
-        $manageStockExpr = $this->stockItem->getManageStockExpr('stock_item');
-        $backordersExpr = $this->stockItem->getBackordersExpr('stock_item');
-        $minQtyExpr = $this->getConnection()->getCheckSql(
-            'selection.selection_can_change_qty',
-            $this->stockItem->getMinSaleQtyExpr('stock_item'),
-            'selection.selection_qty'
+        if ($this->isEnabledFlat()) {
+            return $this;
+        }
+        if (empty($this->_items) || empty($this->_itemsById) || empty($this->_selectAttributes)) {
+            return $this;
+        }
+
+        $entity = $this->getEntity();
+
+        $tableAttributes = [];
+        $attributeTypes = [];
+        $mongoAttributes = [];
+        foreach ($this->_selectAttributes as $attributeCode => $attributeId) {
+            if (!$attributeId) {
+                continue;
+            }
+            $attribute = $this->_eavConfig->getAttribute($entity->getType(), $attributeCode);
+            if ($attribute && !$attribute->isStatic()) {
+                if ($attribute->getBackendTable() == PatchData::BACKEND_TABLE_NAME) {
+                    $mongoAttributes[] = $attributeCode;
+                } else {
+                    $tableAttributes[$attribute->getBackendTable()][] = $attributeId;
+                    if (!isset($attributeTypes[$attribute->getBackendTable()])) {
+                        $attributeTypes[$attribute->getBackendTable()] = $attribute->getBackendType();
+                    }
+                }
+            }
+        }
+
+        $selects = [];
+        foreach ($tableAttributes as $table => $attributes) {
+            $select = $this->_getLoadAttributesSelect($table, $attributes);
+            $selects[$attributeTypes[$table]][] = $this->_addLoadAttributesSelectValues(
+                $select,
+                $table,
+                $attributeTypes[$table]
+            );
+        }
+        $selectGroups = $this->_resourceHelper->getLoadAttributesSelectGroups($selects);
+        foreach ($selectGroups as $selects) {
+            if (!empty($selects)) {
+                try {
+                    if (is_array($selects)) {
+                        $select = implode(' UNION ALL ', $selects);
+                    } else {
+                        $select = $selects;
+                    }
+                    $values = $this->getConnection()->fetchAll($select);
+                } catch (\Exception $e) {
+                    $this->printLogQuery(true, true, $select);
+                    throw $e;
+                }
+
+                foreach ($values as $value) {
+                    $this->_setItemAttributeValue($value);
+                }
+            }
+        }
+        if (!empty($mongoAttributes)) {
+            $storeId = $this->getStoreId();
+            $entityIds = array_keys($this->_itemsById);
+            $results = $this->_mongoQuery->getByIds($storeId, $entityIds, $mongoAttributes);
+            foreach ($results as $result) {
+                $entityIdField = $this->getEntity()->getEntityIdField();
+                $entityId = $result[$entityIdField];
+                foreach ($mongoAttributes as $attributeCode) {
+                    if (isset($result[$attributeCode])) {
+                        foreach ($this->_itemsById[$entityId] as $object) {
+                            $object->setData($attributeCode, $result[$attributeCode]);
+                        }
+                    }
+                }
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Retrieve max value by attribute
+     *
+     * @param string $attribute
+     * @return array|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getMaxAttributeValue($attribute)
+    {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
+            throw new \Exception(
+                'Can not use Mongo Attribute(' . $attribute . ') in getMaxAttributeValue Function in product Collection.'
+            );
+        }
+        $select = clone $this->getSelect();
+        $attribute = $this->getEntity()->getAttribute($attribute);
+        $attributeCode = $attribute->getAttributeCode();
+        $tableAlias = $attributeCode . '_max_value';
+        $fieldAlias = 'max_' . $attributeCode;
+        $condition = 'e.entity_id = ' . $tableAlias . '.entity_id AND ' . $this->_getConditionSql(
+                $tableAlias . '.attribute_id',
+                $attribute->getId()
+            );
+
+        $select->join(
+            [$tableAlias => $attribute->getBackend()->getTable()],
+            $condition,
+            [$fieldAlias => new \Zend_Db_Expr('MAX(' . $tableAlias . '.value)')]
+        )->group(
+            'e.entity_type_id'
         );
 
-        $where = $manageStockExpr . ' = 0';
-        $where .= ' OR ('
-            . 'stock_item.is_in_stock = ' . \Magento\CatalogInventory\Model\Stock::STOCK_IN_STOCK
-            . ' AND ('
-            . $backordersExpr . ' != ' . \Magento\CatalogInventory\Model\Stock::BACKORDERS_NO
-            . ' OR '
-            . $minQtyExpr . ' <= stock_item.qty'
-            . ')'
-            . ')';
-
-        $this->getSelect()
-            ->joinInner(
-                ['stock_item' => $this->stockItem->getMainTable()],
-                'selection.product_id = stock_item.product_id',
-                []
-            )->where($where);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     * @since 100.2.0
-     */
-    public function getNewEmptyItem()
-    {
-        if (null === $this->itemPrototype) {
-            $this->itemPrototype = parent::getNewEmptyItem();
+        $data = $this->getConnection()->fetchRow($select);
+        if (isset($data[$fieldAlias])) {
+            return $data[$fieldAlias];
         }
-        return clone $this->itemPrototype;
+
+        return null;
     }
 
     /**
-     * Add filter by price
+     * Retrieve ranging product count for arrtibute range
      *
-     * @param \Magento\Catalog\Model\Product $product
-     * @param bool $searchMin
-     * @param bool $useRegularPrice
-     *
-     * @return $this
-     * @since 100.2.0
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @param string $attribute
+     * @param int $range
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function addPriceFilter($product, $searchMin, $useRegularPrice = false)
+    public function getAttributeValueCountByRange($attribute, $range)
     {
-        if ($product->getPriceType() == \Magento\Bundle\Model\Product\Price::PRICE_TYPE_DYNAMIC) {
-            $this->addPriceData();
-            if ($useRegularPrice) {
-                $minimalPriceExpression = self::INDEX_TABLE_ALIAS . '.price';
-            } else {
-                $this->getCatalogRuleProcessor()->addPriceData($this, 'selection.product_id');
-                $minimalPriceExpression = 'LEAST(minimal_price, IFNULL(catalog_rule_price, minimal_price))';
+        if ($this->_patchData->isMongoAttribute($attribute)) {
+            throw new \Exception(
+                'Can not use Mongo Attribute(' . $attribute . ') in getAttributeValueCountByRange Function in product Collection.'
+            );
+        }
+        $select = clone $this->getSelect();
+        $attribute = $this->getEntity()->getAttribute($attribute);
+        $attributeCode = $attribute->getAttributeCode();
+        $tableAlias = $attributeCode . '_range_count_value';
+
+        $condition = 'e.entity_id = ' . $tableAlias . '.entity_id AND ' . $this->_getConditionSql(
+                $tableAlias . '.attribute_id',
+                $attribute->getId()
+            );
+
+        $select->reset(\Magento\Framework\DB\Select::GROUP);
+        $select->join(
+            [$tableAlias => $attribute->getBackend()->getTable()],
+            $condition,
+            [
+                'count_' . $attributeCode => new \Zend_Db_Expr('COUNT(DISTINCT e.entity_id)'),
+                'range_' . $attributeCode => new \Zend_Db_Expr('CEIL((' . $tableAlias . '.value+0.01)/' . $range . ')')
+            ]
+        )->group(
+            'range_' . $attributeCode
+        );
+
+        $data = $this->getConnection()->fetchAll($select);
+        $res = [];
+
+        foreach ($data as $row) {
+            $res[$row['range_' . $attributeCode]] = $row['count_' . $attributeCode];
+        }
+        return $res;
+    }
+
+    /**
+     * Retrieve product count by some value of attribute
+     *
+     * @param string $attribute
+     * @return array ($value => $count)
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getAttributeValueCount($attribute)
+    {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
+            throw new \Exception(
+                'Can not use Mongo Attribute(' . $attribute . ') in getAttributeValueCount Function in product Collection.'
+            );
+        }
+        $select = clone $this->getSelect();
+        $attribute = $this->getEntity()->getAttribute($attribute);
+        $attributeCode = $attribute->getAttributeCode();
+        $tableAlias = $attributeCode . '_value_count';
+
+        $select->reset(\Magento\Framework\DB\Select::GROUP);
+        $condition = 'e.entity_id=' . $tableAlias . '.entity_id AND ' . $this->_getConditionSql(
+                $tableAlias . '.attribute_id',
+                $attribute->getId()
+            );
+
+        $select->join(
+            [$tableAlias => $attribute->getBackend()->getTable()],
+            $condition,
+            [
+                'count_' . $attributeCode => new \Zend_Db_Expr('COUNT(DISTINCT e.entity_id)'),
+                'value_' . $attributeCode => new \Zend_Db_Expr($tableAlias . '.value')
+            ]
+        )->group(
+            'value_' . $attributeCode
+        );
+
+        $data = $this->getConnection()->fetchAll($select);
+        $res = [];
+
+        foreach ($data as $row) {
+            $res[$row['value_' . $attributeCode]] = $row['count_' . $attributeCode];
+        }
+        return $res;
+    }
+
+    /**
+     * Return all attribute values as array in form:
+     * array(
+     *   [entity_id_1] => array(
+     *          [store_id_1] => store_value_1,
+     *          [store_id_2] => store_value_2,
+     *          ...
+     *          [store_id_n] => store_value_n
+     *   ),
+     *   ...
+     * )
+     *
+     * @param string $attribute attribute code
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getAllAttributeValues($attribute)
+    {
+        if ($this->_patchData->isMongoAttribute($attribute)) {
+            throw new \Exception(
+                'Can not use Mongo Attribute(' . $attribute . ') in getAllAttributeValues Function in product Collection.'
+            );
+        }
+        /** @var $select \Magento\Framework\DB\Select */
+        $select = clone $this->getSelect();
+        $attribute = $this->getEntity()->getAttribute($attribute);
+
+        $fieldMainTable = $this->getConnection()->getAutoIncrementField($this->getMainTable());
+        $fieldJoinTable = $attribute->getEntity()->getLinkField();
+        $select->reset()
+            ->from(
+                ['cpe' => $this->getMainTable()],
+                ['entity_id']
+            )->join(
+                ['cpa' => $attribute->getBackend()->getTable()],
+                'cpe.' . $fieldMainTable . ' = cpa.' . $fieldJoinTable,
+                ['store_id', 'value']
+            )->where('attribute_id = ?', (int)$attribute->getId());
+
+        $data = $this->getConnection()->fetchAll($select);
+        $res = [];
+
+        foreach ($data as $row) {
+            $res[$row['entity_id']][$row['store_id']] = $row['value'];
+        }
+
+        return $res;
+    }
+
+    /**
+     * Add attribute to filter
+     *
+     * @param \Magento\Eav\Model\Entity\Attribute\AbstractAttribute|string|array $attribute
+     * @param array $condition
+     * @param string $joinType
+     * @return $this
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
+    {
+        if ($this->isEnabledFlat()) {
+            if ($attribute instanceof \Magento\Eav\Model\Entity\Attribute\AbstractAttribute) {
+                $attribute = $attribute->getAttributeCode();
             }
-            $orderByValue = new \Zend_Db_Expr(
-                '(' .
-                $minimalPriceExpression .
-                ' * selection.selection_qty' .
-                ')'
-            );
+
+            if (is_array($attribute)) {
+                $sqlArr = [];
+                foreach ($attribute as $condition) {
+                    $sqlArr[] = $this->_getAttributeConditionSql($condition['attribute'], $condition, $joinType);
+                }
+                $conditionSql = '(' . join(') OR (', $sqlArr) . ')';
+                $this->getSelect()->where($conditionSql);
+                return $this;
+            }
+
+            if (!isset($this->_selectAttributes[$attribute])) {
+                $this->addAttributeToSelect($attribute);
+            }
+
+            if (isset($this->_selectAttributes[$attribute])) {
+                $this->getSelect()->where($this->_getConditionSql('e.' . $attribute, $condition));
+            }
+
+            return $this;
+        }
+
+        $this->_allIdsCache = null;
+
+        if (is_string($attribute) && $attribute == 'is_saleable') {
+            $columns = $this->getSelect()->getPart(\Magento\Framework\DB\Select::COLUMNS);
+            foreach ($columns as $columnEntry) {
+                list($correlationName, $column, $alias) = $columnEntry;
+                if ($alias == 'is_saleable') {
+                    if ($column instanceof \Zend_Db_Expr) {
+                        $field = $column;
+                    } else {
+                        $connection = $this->getSelect()->getConnection();
+                        if (empty($correlationName)) {
+                            $field = $connection->quoteColumnAs($column, $alias, true);
+                        } else {
+                            $field = $connection->quoteColumnAs([$correlationName, $column], $alias, true);
+                        }
+                    }
+                    $this->getSelect()->where("{$field} = ?", $condition);
+                    break;
+                }
+            }
+
+            return $this;
         } else {
-            $connection = $this->getConnection();
-            $priceType = $connection->getIfNullSql(
-                'price.selection_price_type',
-                'selection.selection_price_type'
-            );
-            $priceValue = $connection->getIfNullSql(
-                'price.selection_price_value',
-                'selection.selection_price_value'
-            );
-            if (!$this->websiteScopePriceJoined) {
-                $websiteId = $this->_storeManager->getStore()->getWebsiteId();
-                $this->getSelect()->joinLeft(
-                    ['price' => $this->getTable('catalog_product_bundle_selection_price')],
-                    'selection.selection_id = price.selection_id AND price.website_id = ' . (int)$websiteId,
-                    []
+            if ($attribute === null) {
+                $this->getSelect();
+                return $this;
+            }
+
+            if (is_numeric($attribute)) {
+                $attributeModel = $this->getEntity()->getAttribute($attribute);
+                if (!$attributeModel) {
+                    throw new \Magento\Framework\Exception\LocalizedException(
+                        __('Invalid attribute identifier for filter (%1)', get_class($attribute))
+                    );
+                }
+                $attribute = $attributeModel->getAttributeCode();
+            } elseif ($attribute instanceof \Magento\Eav\Model\Entity\Attribute\AttributeInterface) {
+                $attribute = $attribute->getAttributeCode();
+            }
+
+            //TODO Make this able processed.
+            $conditionSql = '';
+            if (is_array($attribute)) {
+                $sqlArr = [];
+                foreach ($attribute as $condition) {
+                    if ($this->_patchData->isMongoAttribute($attribute)) {
+                        $this->_filterMongoAttributes[$attribute] = $condition;
+                        throw new \Exception(
+                            'No use Mongo Attribute(' . $attribute . ') in addAttributeToFilter Function in product Collection.'
+                        );
+                    } else {
+                        $sqlArr[] = $this->_getAttributeConditionSql($condition['attribute'], $condition, $joinType);
+                    }
+                }
+                if ($sqlArr) {
+                    $conditionSql = '(' . implode(') OR (', $sqlArr) . ')';
+                }
+            } elseif (is_string($attribute)) {
+                if ($condition === null) {
+                    $condition = '';
+                }
+                //TODO Make this able processed.
+                if ($this->_patchData->isMongoAttribute($attribute)) {
+                    $this->_filterMongoAttributes[$attribute] = $condition;
+                    throw new \Exception(
+                        'No use Mongo Attribute(' . $attribute . ') in addAttributeToFilter Function in product Collection.'
+                    );
+                } else {
+                    $conditionSql = $this->_getAttributeConditionSql($attribute, $condition, $joinType);
+                }
+            }
+
+            if (!empty($conditionSql)) {
+                $this->getSelect()->where($conditionSql, null, \Magento\Framework\DB\Select::TYPE_CONDITION);
+                $this->_totalRecords = null;
+            } else {
+                throw new \Magento\Framework\Exception\LocalizedException(
+                    __('Invalid attribute identifier for filter (%1)', get_class($attribute))
                 );
             }
-            $price = $connection->getCheckSql(
-                $priceType . ' = 1',
-                (float) $product->getPrice() . ' * '. $priceValue . ' / 100',
-                $priceValue
-            );
-            $orderByValue = new \Zend_Db_Expr('('. $price. ' * '. 'selection.selection_qty)');
+
+            return $this;
+        }
+    }
+
+    /**
+     * Add attribute to sort order
+     *
+     * @param string $attribute
+     * @param string $dir
+     * @return $this
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function addAttributeToSort($attribute, $dir = self::SORT_ORDER_ASC)
+    {
+        if ($attribute == 'position') {
+            if (isset($this->_joinFields[$attribute])) {
+                $this->getSelect()->order($this->_getAttributeFieldName($attribute) . ' ' . $dir);
+                return $this;
+            }
+            if ($this->isEnabledFlat()) {
+                $this->getSelect()->order("cat_index_position {$dir}");
+            }
+            // optimize if using cat index
+            $filters = $this->_productLimitationFilters;
+            if (isset($filters['category_id']) || isset($filters['visibility'])) {
+                $this->getSelect()->order('cat_index.position ' . $dir);
+            } else {
+                $this->getSelect()->order('e.entity_id ' . $dir);
+            }
+
+            return $this;
+        } elseif ($attribute == 'is_saleable') {
+            $this->getSelect()->order("is_salable " . $dir);
+            return $this;
         }
 
-        $this->getSelect()->reset(Select::ORDER);
-        $this->getSelect()->order(new \Zend_Db_Expr($orderByValue . ($searchMin ? Select::SQL_ASC : Select::SQL_DESC)));
-        $this->getSelect()->limit(1);
+        $storeId = $this->getStoreId();
+        if ($attribute == 'price' && $storeId != 0) {
+            $this->addPriceData();
+            if ($this->_productLimitationFilters->isUsingPriceIndex()) {
+                $this->getSelect()->order("price_index.min_price {$dir}");
+                return $this;
+            }
+        }
+
+        //TODO Make this able processed.
+        if ($this->_patchData->isMongoAttribute($attribute)) {
+            $this->_sortMongoAttributes[$attribute] = $dir;
+            throw new \Exception(
+                'No use Mongo Attribute(' . $attribute . ') in addAttributeToSort Function in product Collection.'
+            );
+            return this;
+        }
+
+        if ($this->isEnabledFlat()) {
+            $column = $this->getEntity()->getAttributeSortColumn($attribute);
+
+            if ($column) {
+                $this->getSelect()->order("e.{$column} {$dir}");
+            } elseif (isset($this->_joinFields[$attribute])) {
+                $this->getSelect()->order($this->_getAttributeFieldName($attribute) . ' ' . $dir);
+            }
+
+            return $this;
+        } else {
+            $attrInstance = $this->getEntity()->getAttribute($attribute);
+            if ($attrInstance && $attrInstance->usesSource()) {
+                $attrInstance->getSource()->addValueSortToCollection($this, $dir);
+                return $this;
+            }
+        }
+
+        if (isset($this->_joinFields[$attribute])) {
+            $this->getSelect()->order($this->_getAttributeFieldName($attribute) . ' ' . $dir);
+            return $this;
+        }
+        if (isset($this->_staticFields[$attribute])) {
+            $this->getSelect()->order("e.{$attribute} {$dir}");
+            return $this;
+        }
+        if (isset($this->_joinAttributes[$attribute])) {
+            $attrInstance = $this->_joinAttributes[$attribute]['attribute'];
+            $entityField = $this->_getAttributeTableAlias($attribute) . '.' . $attrInstance->getAttributeCode();
+        } else {
+            $attrInstance = $this->getEntity()->getAttribute($attribute);
+            $entityField = 'e.' . $attribute;
+        }
+
+        if ($attrInstance) {
+            if ($attrInstance->getBackend()->isStatic()) {
+                $orderExpr = $entityField;
+            } else {
+                $this->_addAttributeJoin($attribute, 'left');
+                if (isset($this->_joinAttributes[$attribute]) || isset($this->_joinFields[$attribute])) {
+                    $orderExpr = $attribute;
+                } else {
+                    $orderExpr = $this->_getAttributeTableAlias($attribute) . '.value';
+                }
+            }
+
+            if (in_array($attrInstance->getFrontendClass(), $this->_castToIntMap)) {
+                $orderExpr = new \Zend_Db_Expr("CAST({$this->_prepareOrderExpression($orderExpr)} AS SIGNED)");
+            }
+
+            $orderExpr .= ' ' . $dir;
+            $this->getSelect()->order($orderExpr);
+        }
         return $this;
     }
 
     /**
-     * Get Catalog Rule Processor.
+     * Retrieve is flat enabled. Return always false if magento run admin.
+     * In this time, Use Mongo instead of flat. Return always false.
      *
-     * @return \Magento\CatalogRule\Model\ResourceModel\Product\CollectionProcessor
-     *
-     * @deprecated 100.2.0
+     * @return bool
      */
-    private function getCatalogRuleProcessor()
+    public function isEnabledFlat()
     {
-        if (null === $this->catalogRuleProcessor) {
-            $this->catalogRuleProcessor = \Magento\Framework\App\ObjectManager::getInstance()
-                ->get(\Magento\CatalogRule\Model\ResourceModel\Product\CollectionProcessor::class);
-        }
-
-        return $this->catalogRuleProcessor;
+        return false;
     }
 }
