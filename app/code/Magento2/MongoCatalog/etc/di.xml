@@ -11,4 +11,8 @@
     <preference for="Magento\Catalog\Model\ResourceModel\Product\Action" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Action" />
     <preference for="Magento\Catalog\Model\ResourceModel\Product\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Collection" />
     <preference for="Magento\Catalog\Ui\DataProvider\Product\ProductCollection" type="Magento2\MongoCatalog\Ui\DataProvider\Product\ProductCollection" />
+    <preference for="Magento\Catalog\Model\ResourceModel\Product\Link\Product\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Link\Product\Collection" />
+    <preference for="Magento\Catalog\Model\ResourceModel\Product\Compare\Item\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Compare\Item\Collection" />
+    <preference for="Magento\Bundle\Model\ResourceModel\Selection\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Selection\Collection" />
+    <preference for="Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable\Product\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Type\Configurable\Product\Collection" />
 </config>

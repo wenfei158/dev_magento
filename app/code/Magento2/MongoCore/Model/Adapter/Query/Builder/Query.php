@@ -89,7 +89,7 @@ class Query implements QueryInterface
         if (!$groupId) {
             return [];
         }
-        $filter = [self::PRODUCT_GROUP_ID => ['$eq' => (integer)$groupId]];
+        $filter = [self::PRODUCT_GROUP_ID => $groupId];
         $options = $this->setOptions($attributeFields);
         $results = $this->adapter->find((string)$storeId, $filter, $options);
         return $results;
@@ -101,7 +101,7 @@ class Query implements QueryInterface
     public function getByGroupConditions($storeId, $groupId, array $conditions, array $attributeFields = [])
     {
         if ($groupId) {
-            $filter = [self::PRODUCT_GROUP_ID => ['$eq' => (integer)$groupId]];
+            $filter = [self::PRODUCT_GROUP_ID => $groupId];
         } else {
             $filter = [];
         }
