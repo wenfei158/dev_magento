@@ -4,17 +4,21 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magento2\MongoCatalog\Model\ResourceModel\Product\Compare\Item;
+namespace Magento2\MongoCatalog\Model\Reports\ResourceModel\Product\Downloads;
 
 use Magento2\MongoCatalog\Helper\LoadMongoAttributes;
 use Magento\Framework\App\ObjectManager;
 
 /**
- * Catalog Product Compare Items Resource Collection
+ * Product Downloads Report collection
  *
+ * @author      Magento Core Team <core@magentocommerce.com>
+ *
+ * @api
  * @since 100.0.2
+ * @SuppressWarnings(PHPMD.CookieAndSessionMisuse)
  */
-class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Compare\Item\Collection
+class Collection extends \Magento\Reports\Model\ResourceModel\Product\Downloads\Collection
 {
     /**
      * {@inheritdoc}

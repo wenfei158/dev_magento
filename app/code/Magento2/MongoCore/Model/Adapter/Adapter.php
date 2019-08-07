@@ -57,6 +57,15 @@ class Adapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
+    public function dropCollection($collectionName, array $options = [])
+    {
+        $collection = $this->db->dropCollection($collectionName, $options);
+        return $collection;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function listIndexes($collectionName)
     {
         $indexes = $this->_selectCollection($collectionName)->listIndexes();

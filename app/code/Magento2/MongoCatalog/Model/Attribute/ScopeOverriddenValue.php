@@ -172,14 +172,15 @@ class ScopeOverriddenValue extends \Magento\Catalog\Model\Attribute\ScopeOverrid
                     ->where('t.store_id IN (?)', $storeIds);
                 $selects[] = $select;
             }
-
-            $unionSelect = new \Magento\Framework\DB\Sql\UnionExpression(
-                $selects,
-                \Magento\Framework\DB\Select::SQL_UNION_ALL
-            );
-            $attributes = $metadata->getEntityConnection()->fetchAll((string)$unionSelect);
-            foreach ($attributes as $attribute) {
-                $this->attributesValues[$attribute['store_id']][$attribute['attribute_code']] = $attribute['value'];
+            if(count($selects)){
+                $unionSelect = new \Magento\Framework\DB\Sql\UnionExpression(
+                    $selects,
+                    \Magento\Framework\DB\Select::SQL_UNION_ALL
+                );
+                $attributes = $metadata->getEntityConnection()->fetchAll((string)$unionSelect);
+                foreach ($attributes as $attribute) {
+                    $this->attributesValues[$attribute['store_id']][$attribute['attribute_code']] = $attribute['value'];
+                }
             }
             //TODO: Multiple storeIds Process
             if(count($MongoAttributes)) {

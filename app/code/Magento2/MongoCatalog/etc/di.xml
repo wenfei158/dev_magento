@@ -6,13 +6,46 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="Magento\Catalog\Model\Attribute\ScopeOverriddenValue" type="Magento2\MongoCatalog\Model\Attribute\ScopeOverriddenValue" />
     <preference for="Magento\Catalog\Model\ResourceModel\Product" type="Magento2\MongoCatalog\Model\ResourceModel\Product" />
     <preference for="Magento\Catalog\Model\ResourceModel\Product\Action" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Action" />
+    <preference for="Magento\Catalog\Model\Attribute\ScopeOverriddenValue" type="Magento2\MongoCatalog\Model\Attribute\ScopeOverriddenValue" />
     <preference for="Magento\Catalog\Model\ResourceModel\Product\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Collection" />
     <preference for="Magento\Catalog\Ui\DataProvider\Product\ProductCollection" type="Magento2\MongoCatalog\Ui\DataProvider\Product\ProductCollection" />
-    <preference for="Magento\Catalog\Model\ResourceModel\Product\Link\Product\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Link\Product\Collection" />
-    <preference for="Magento\Catalog\Model\ResourceModel\Product\Compare\Item\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Compare\Item\Collection" />
+    <preference for="Magento\Reports\Model\ResourceModel\Product\Collection" type="Magento2\MongoCatalog\Model\Reports\ResourceModel\Product\Collection" />
+    <preference for="Magento\Reports\Model\ResourceModel\Product\Lowstock\Collection" type="Magento2\MongoCatalog\Model\Reports\ResourceModel\Product\LowStock\Collection" />
+    <preference for="Magento\Reports\Model\ResourceModel\Product\Downloads\Collection" type="Magento2\MongoCatalog\Model\Reports\ResourceModel\Product\Downloads\Collection" />
     <preference for="Magento\Bundle\Model\ResourceModel\Selection\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Selection\Collection" />
     <preference for="Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable\Product\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Type\Configurable\Product\Collection" />
+    <preference for="Magento\Catalog\Model\ResourceModel\Product\Link\Product\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Link\Product\Collection" />
+    <preference for="Magento\GroupedProduct\Model\ResourceModel\Product\Type\Grouped\AssociatedProductsCollection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Type\Grouped\AssociatedProductsCollection" />
+    <preference for="Magento\Catalog\Model\ResourceModel\Product\Compare\Item\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Product\Compare\Item\Collection" />
+    <preference for="Magento\CatalogSearch\Model\ResourceModel\Search\Collection" type="Magento2\MongoCatalog\Model\ResourceModel\Search\Collection" />
+    <type name="Magento\Catalog\Model\ResourceModel\Product\Collection">
+        <plugin name="removeMongoAttributes" type="Magento2\MongoCatalog\Plugin\MagentoCollectionPlugin" sortOrder="1" disabled="false" />
+    </type>
+    <preference for="Magento\Catalog\Model\ResourceModel\AttributePersistor" type="Magento2\MongoCatalog\Model\ResourceModel\AttributePersistor" />
+    <virtualType name="Magento2\MongoCatalog\Model\ResourceModel\CreateHandler" type="Magento\Eav\Model\ResourceModel\CreateHandler">
+        <arguments>
+            <argument name="metadataPool" xsi:type="object">Magento\Catalog\EntityCreator\MetadataPool</argument>
+            <argument name="attributePersistor" xsi:type="object">Magento2\MongoCatalog\Model\ResourceModel\AttributePersistor</argument>
+            <argument name="scopeResolver" xsi:type="object">Magento\Catalog\Model\Entity\CreationScopeResolver</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magento2\MongoCatalog\Model\ResourceModel\UpdateHandler" type="Magento\Eav\Model\ResourceModel\UpdateHandler">
+        <arguments>
+            <argument name="attributePersistor" xsi:type="object">Magento2\MongoCatalog\Model\ResourceModel\AttributePersistor</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\EntityManager\Operation\AttributePool">
+        <arguments>
+            <argument name="extensionActions" xsi:type="array">
+                <item name="eav" xsi:type="array">
+                    <item name="Magento\Catalog\Api\Data\ProductInterface" xsi:type="array">
+                        <item name="create" xsi:type="string">Magento2\MongoCatalog\Model\ResourceModel\CreateHandler</item>
+                        <item name="update" xsi:type="string">Magento2\MongoCatalog\Model\ResourceModel\UpdateHandler</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>

@@ -4,17 +4,18 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magento2\MongoCatalog\Model\ResourceModel\Product\Compare\Item;
+namespace Magento2\MongoCatalog\Model\ResourceModel\Product\Type\Grouped;
 
 use Magento2\MongoCatalog\Helper\LoadMongoAttributes;
 use Magento\Framework\App\ObjectManager;
 
 /**
- * Catalog Product Compare Items Resource Collection
+ * Associated products collection.
  *
- * @since 100.0.2
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.CookieAndSessionMisuse)
  */
-class Collection extends \Magento\Catalog\Model\ResourceModel\Product\Compare\Item\Collection
+class AssociatedProductsCollection extends \Magento\GroupedProduct\Model\ResourceModel\Product\Type\Grouped\AssociatedProductsCollection
 {
     /**
      * {@inheritdoc}

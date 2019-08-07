@@ -118,8 +118,9 @@ class Query implements QueryInterface
     private function setOptions($attributeFields)
     {
         $entityIdField = \Magento\Eav\Model\Entity::DEFAULT_ENTITY_ID_FIELD;
-        $options = ["typeMap" => ['root' => 'array', 'document' => 'array'], "projection" => [$entityIdField => 1]];
+        $options = ["typeMap" => ['root' => 'array', 'document' => 'array']];
         if ($attributeFields) {
+            $options["projection"][$entityIdField] = 1;
             foreach ($attributeFields as $attributeField) {
                 $options['projection'][$attributeField] = 1;
             }

@@ -272,65 +272,6 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
     }
 
     /**
-     * Load model attributes data
-     *
-     * @param \Magento\Framework\Model\AbstractModel $object
-     * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    protected function _loadModelAttributes($object)
-    {
-        $entityId = $object->getId();
-        if (!$entityId) {
-            return $this;
-        }
-
-        \Magento\Framework\Profiler::start('load_model_attributes');
-
-        $selects = [];
-        foreach (array_keys($this->getAttributesByTable()) as $table) {
-            if($table == PatchData::BACKEND_TABLE_NAME) {
-                $attributeCodeList = [];
-                foreach ($this->_attributesByTable[$table] as $attribute){
-                    $attributeCodeList[] = $attribute->getAttributeCode();
-                }
-                if(!empty($attributeCodeList)) {
-                    $storeId = $object->getStoreId() ? : $this->getDefaultStoreId();
-                    $result = $this->_mongoQuery->getById($storeId, $entityId, $attributeCodeList);
-                    foreach($attributeCodeList as $attributeCode) {
-                        if (isset($result[$attributeCode])) {
-                            $object->setData($attributeCode, $result[$attributeCode]);
-                        }
-                    }
-                }
-            } else {
-                $attribute = current($this->_attributesByTable[$table]);
-                $eavType = $attribute->getBackendType();
-                $select = $this->_getLoadAttributesSelect($object, $table);
-                $selects[$eavType][] = $select->columns('*');
-            }
-        }
-        $selectGroups = $this->_resourceHelper->getLoadAttributesSelectGroups($selects);
-        foreach ($selectGroups as $selects) {
-            if (!empty($selects)) {
-                if (is_array($selects)) {
-                    $select = $this->_prepareLoadSelect($selects);
-                } else {
-                    $select = $selects;
-                }
-                $values = $this->getConnection()->fetchAll($select);
-                foreach ($values as $valueRow) {
-                    $this->_setAttributeValue($object, $valueRow);
-                }
-            }
-        }
-
-        \Magento\Framework\Profiler::stop('load_model_attributes');
-
-        return $this;
-    }
-
-    /**
      * Save and delete collected attribute values
      *
      * @return $this
