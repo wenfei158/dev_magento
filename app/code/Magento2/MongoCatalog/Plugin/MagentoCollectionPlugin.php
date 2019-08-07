@@ -21,7 +21,7 @@ class MagentoCollectionPlugin
         }
     }
 
-    public function beforeAddAttributeToFilter(\Magento\Catalog\Model\ResourceModel\Product\Collection $subject, $attribute)
+    public function beforeAddAttributeToFilter(\Magento\Catalog\Model\ResourceModel\Product\Collection $subject, $attribute, $condition, $joinType)
     {
         if ($attribute instanceof \Magento\Eav\Model\Entity\Attribute\AbstractAttribute) {
             $attribute = $attribute->getAttributeCode();
@@ -41,9 +41,9 @@ class MagentoCollectionPlugin
             }
         } elseif (is_array($attribute)) {
             $newAttribute = [];
-            foreach ($attribute as $condition) {
-                if (!$this->patchData->isMongoAttribute($attribute)) {
-                    $newAttribute[] = array($condition);
+            foreach ($attribute as $item) {
+                if (!$this->patchData->isMongoAttribute($item['attribute'])) {
+                    $newAttribute[] = $item;
                 }
             }
             if ($newAttribute) {
@@ -56,15 +56,15 @@ class MagentoCollectionPlugin
                 $attribute = null;
             }
         }
-        return $attribute;
+        return array($attribute, $condition, $joinType);
     }
 
-    public function beforeAddAttributeToSort(\Magento\Catalog\Model\ResourceModel\Product\Collection $subject, $attribute)
+    public function beforeAddAttributeToSort(\Magento\Catalog\Model\ResourceModel\Product\Collection $subject, $attribute, $dir)
     {
         if ($this->patchData->isMongoAttribute($attribute)) {
             $attribute = 'sku';
         }
-        return $attribute;
+        return array($attribute, $dir);
     }
 
     public function beforeGetAllAttributeValues($attribute){
