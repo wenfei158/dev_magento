@@ -21,7 +21,7 @@ class MagentoCollectionPlugin
         }
     }
 
-    public function beforeAddAttributeToFilter(\Magento\Catalog\Model\ResourceModel\Product\Collection $subject, $attribute, $condition, $joinType)
+    public function beforeAddAttributeToFilter(\Magento\Catalog\Model\ResourceModel\Product\Collection $subject, $attribute, $condition)
     {
         if ($attribute instanceof \Magento\Eav\Model\Entity\Attribute\AbstractAttribute) {
             $attribute = $attribute->getAttributeCode();
@@ -56,7 +56,7 @@ class MagentoCollectionPlugin
                 $attribute = null;
             }
         }
-        return array($attribute, $condition, $joinType);
+        return array($attribute, $condition);
     }
 
     public function beforeAddAttributeToSort(\Magento\Catalog\Model\ResourceModel\Product\Collection $subject, $attribute, $dir)
