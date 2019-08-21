@@ -1,0 +1,22 @@
+{
+  "name": "magento2/module-mongo-catalog",
+  "description": "The module processes some product attributes by mongoDB instead of MySQL",
+  "require": {
+    "magento/product-community-edition": "^2.3.2",
+    "magento2/module-mongo-core": "^1.0.0",
+    "magento2/module-mongo-store": "^1.1.0"
+  },
+  "version": "1.1.0",
+  "type": "magento2-module",
+  "license": [
+    "proprietary"
+  ],
+  "autoload": {
+    "files": [
+      "./registration.php"
+    ],
+    "psr-4": {
+      "Magento2\\MongoCatalog\\": "app/code/Magento2/MongoCatalog"
+    }
+  }
+}

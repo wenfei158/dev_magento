@@ -212,7 +212,7 @@ return [
         'Klarna_Kp' => 1,
         'Magento_PaypalReCaptcha' => 1,
         'MSP_TwoFactorAuth' => 1,
-        'MonotaRO_CustomProductAttributes' => 1,
+        'Magento2_MongoCore' => 1,
         'Temando_Shipping' => 1,
         'Vertex_Tax' => 1
     ]
